@@ -24,10 +24,10 @@ variable "addons" {
   type        = any
   default = {
     enable_aws_load_balancer_controller = true
-    enable_aws_ebs_csi_resources        = true # generate gp2 and gp3 storage classes for ebs-csi
+    enable_aws_ebs_csi_resources        = false # generate gp2 and gp3 storage classes for ebs-csi
     enable_metrics_server               = true
-    enable_gatekeeper                   = true
-    enable_karpenter                    = true
+    enable_gatekeeper                   = false
+    enable_karpenter                    = false
     enable_argocd                       = true
   }
 }
@@ -35,7 +35,7 @@ variable "addons" {
 variable "gitops_addons_org" {
   description = "Git repository org/user contains for addons"
   type        = string
-  default     = "https://github.com/markoskandylis/gitops-bridge"
+  default     = "https://github.com/markoskandylis/"
 }
 variable "gitops_addons_repo" {
   description = "Git repository contains for addons"
@@ -61,5 +61,5 @@ variable "gitops_addons_path" {
 variable "platform_stack_version" {
   description = "Platform stack version"
   type        = string
-  default     = "v1.30-v1.1.0"
+  default     = "v1.30-v1.0.0"
 }

@@ -198,20 +198,20 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
 
   enable_cluster_creator_admin_permissions = true
-  access_entries = {
-    # One access entry with a policy associated
-    argo-cd = {
-      principal_arn = aws_iam_role.spoke.arn
-      policy_associations = {
-        argocd = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          access_scope = {
-            type = "cluster"
-          }
-        }
-      }
-    }
-  }
+  # access_entries = {
+  #   # One access entry with a policy associated
+  #   argo-cd = {
+  #     principal_arn = module.argocd_irsa.iam_role_arn
+  #     policy_associations = {
+  #       argocd = {
+  #         policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+  #         access_scope = {
+  #           type = "cluster"
+  #         }
+  #       }
+  #     }
+  #   }
+  # }
   eks_managed_node_groups = {
     initial = {
       instance_types = ["t3.medium"]
