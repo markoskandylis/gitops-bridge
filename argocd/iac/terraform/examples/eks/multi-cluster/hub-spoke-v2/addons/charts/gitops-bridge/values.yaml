@@ -1,4 +1,4 @@
-stackPath: '**/stack{{(.metadata.annotations.platform_stack_version | default "")}}.yaml'
+stackPath: '**/stacks{{(.metadata.annotations.platform_stack_version | default "")}}.yaml'
 repoURLGit: "'{{.metadata.annotations.addons_repo_url}}'"
 repoURLGitRevision: HEAD
 repoURLGitBasePath: "**"

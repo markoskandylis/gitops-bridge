@@ -28,7 +28,7 @@ variable "addons" {
     enable_metrics_server               = true
     enable_gatekeeper                   = false
     enable_karpenter                    = false
-    enable_argocd                       = true
+    enable_argocd                       = false
   }
 }
 # Addons Git
