@@ -27,7 +27,7 @@ variable "addons" {
     enable_aws_ebs_csi_resources        = true # generate gp2 and gp3 storage classes for ebs-csi
     enable_metrics_server               = true
     enable_gatekeeper                   = true
-    enable_karpenter                   = true
+    enable_karpenter                    = true
     enable_argocd                       = true
   }
 }
@@ -35,7 +35,7 @@ variable "addons" {
 variable "gitops_addons_org" {
   description = "Git repository org/user contains for addons"
   type        = string
-  default     = "https://github.com/gitops-bridge-dev"
+  default     = "https://github.com/markoskandylis/"
 }
 variable "gitops_addons_repo" {
   description = "Git repository contains for addons"
@@ -45,12 +45,12 @@ variable "gitops_addons_repo" {
 variable "gitops_addons_revision" {
   description = "Git repository revision/branch/ref for addons"
   type        = string
-  default     = "single-cluster-v2"
+  default     = "gitops-v2"
 }
 variable "gitops_addons_basepath" {
   description = "Git repository base path for addons"
   type        = string
-  default     = "argocd/iac/terraform/examples/eks/single-cluster-v2/addons/"
+  default     = "argocd/iac/terraform/examples/eks/multi-cluster/hub-spoke-v2/addons/"
 }
 variable "gitops_addons_path" {
   description = "Git repository path for addons"
@@ -62,7 +62,7 @@ variable "gitops_addons_path" {
 variable "gitops_workload_org" {
   description = "Git repository org/user contains for workload"
   type        = string
-  default     = "https://github.com/gitops-bridge-dev"
+  default     = "https://github.com/markoskandylis/"
 }
 variable "gitops_workload_repo" {
   description = "Git repository contains for workload"
@@ -72,21 +72,21 @@ variable "gitops_workload_repo" {
 variable "gitops_workload_revision" {
   description = "Git repository revision/branch/ref for workload"
   type        = string
-  default     = "single-cluster-v2"
+  default     = "gitops-v2"
 }
 variable "gitops_workload_basepath" {
   description = "Git repository base path for workload"
   type        = string
-  default     = "argocd/iac/terraform/examples/eks/"
+  default     = "argocd/iac/terraform/examples/eks/multi-cluster/hub-spoke-v2/"
 }
 variable "gitops_workload_path" {
   description = "Git repository path for workload"
   type        = string
-  default     = "single-cluster-v2/k8s"
+  default     = "spoke-v2/k8s"
 }
 
 variable "platform_stack_version" {
   description = "Platform stack version"
   type        = string
-  default     = "v1.30-v1.1.0"
+  default     = "hub-v1.30-v1.0.1"
 }

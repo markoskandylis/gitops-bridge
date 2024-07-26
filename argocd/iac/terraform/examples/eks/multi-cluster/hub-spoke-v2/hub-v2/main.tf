@@ -152,7 +152,7 @@ module "gitops_bridge_bootstrap" {
 ################################################################################
 module "eks_blueprints_addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "~> 1.0"
+  version = "~> 1.16.3"
 
   cluster_name      = module.eks.cluster_name
   cluster_endpoint  = module.eks.cluster_endpoint
@@ -198,20 +198,7 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
 
   enable_cluster_creator_admin_permissions = true
-  # access_entries = {
-  #   # One access entry with a policy associated
-  #   argo-cd = {
-  #     principal_arn = module.argocd_irsa.iam_role_arn
-  #     policy_associations = {
-  #       argocd = {
-  #         policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-  #         access_scope = {
-  #           type = "cluster"
-  #         }
-  #       }
-  #     }
-  #   }
-  # }
+
   eks_managed_node_groups = {
     initial = {
       instance_types = ["t3.medium"]
@@ -225,6 +212,9 @@ module "eks" {
   cluster_addons = {
     coredns    = {}
     kube-proxy = {}
+    eks-pod-identity-agent = {
+      most_recent = true
+    }
     vpc-cni = {
       # Specify the VPC CNI addon should be deployed before compute to ensure
       # the addon is configured before data plane compute resources are created
@@ -290,4 +280,52 @@ module "vpc" {
   }
 
   tags = local.tags
+}
+
+
+################################################################################
+# ArgoCD EKS Access
+################################################################################
+data "aws_iam_policy_document" "eks_assume" {
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["pods.eks.amazonaws.com"]
+    }
+    actions = ["sts:AssumeRole","sts:TagSession"]
+  }
+}
+resource "aws_iam_role" "argocd_hub" {
+  name               = "${module.eks.cluster_name}-argocd-hub"
+  assume_role_policy = data.aws_iam_policy_document.eks_assume.json
+}
+data "aws_iam_policy_document" "aws_assume_policy" {
+  statement {
+    effect    = "Allow"
+    resources = ["*"]
+    actions   = ["sts:AssumeRole","sts:TagSession"]
+  }
+}
+resource "aws_iam_policy" "aws_assume_policy" {
+  name        = "${module.eks.cluster_name}-argocd-aws-assume"
+  description = "IAM Policy for ArgoCD Hub"
+  policy      = data.aws_iam_policy_document.aws_assume_policy.json
+  tags        = local.tags
+}
+resource "aws_iam_role_policy_attachment" "aws_assume_policy" {
+  role       = aws_iam_role.argocd_hub.name
+  policy_arn = aws_iam_policy.aws_assume_policy.arn
+}
+resource "aws_eks_pod_identity_association" "argocd_app_controller" {
+  cluster_name    = module.eks.cluster_name
+  namespace       = "argocd"
+  service_account = "argocd-application-controller"
+  role_arn        = aws_iam_role.argocd_hub.arn
+}
+resource "aws_eks_pod_identity_association" "argocd_api_server" {
+  cluster_name    = module.eks.cluster_name
+  namespace       = "argocd"
+  service_account = "argocd-server"
+  role_arn        = aws_iam_role.argocd_hub.arn
 }

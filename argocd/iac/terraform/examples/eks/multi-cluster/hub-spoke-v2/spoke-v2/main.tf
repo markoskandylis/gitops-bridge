@@ -4,19 +4,34 @@ provider "aws" {
 data "aws_caller_identity" "current" {}
 data "aws_availability_zones" "available" {}
 
-provider "helm" {
-  kubernetes {
-    host                   = module.eks.cluster_endpoint
-    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+data "terraform_remote_state" "cluster_hub" {
+  backend = "local"
 
-    exec {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "aws"
-      # This requires the awscli to be installed locally where Terraform is executed
-      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", local.region]
-    }
+  config = {
+    path = "${path.module}/../hub-v2/terraform.tfstate"
   }
 }
+
+################################################################################
+# Kubernetes Access for Hub Cluster
+################################################################################
+
+provider "kubernetes" {
+  host                   = data.terraform_remote_state.cluster_hub.outputs.cluster_endpoint
+  cluster_ca_certificate = base64decode(data.terraform_remote_state.cluster_hub.outputs.cluster_certificate_authority_data)
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    # This requires the awscli to be installed locally where Terraform is executed
+    args = ["eks", "get-token", "--cluster-name", data.terraform_remote_state.cluster_hub.outputs.cluster_name, "--region", data.terraform_remote_state.cluster_hub.outputs.cluster_region]
+  }
+  alias = "hub"
+}
+
+################################################################################
+# Kubernetes Access for Spoke Cluster
+################################################################################
 
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
@@ -30,11 +45,11 @@ provider "kubernetes" {
   }
 }
 
-locals {
-  name   = "getting-started"
-  region = var.region
 
-  environment = var.environment
+locals {
+  name   = "spoke-${terraform.workspace}"
+  environment = terraform.workspace
+  region = var.region
 
   cluster_version = var.kubernetes_version
 
@@ -104,12 +119,12 @@ locals {
 
   addons_metadata = merge(
     {
-    platform_stack_version = var.platform_stack_version
-    },
-    {
       aws_karpenter_role_name = "${module.eks.cluster_name}-karpenter"
     },
     module.eks_blueprints_addons.gitops_metadata,
+    {
+      platform_stack_version = var.platform_stack_version
+    },
     {
       aws_cluster_name = module.eks.cluster_name
       aws_region       = local.region
@@ -131,7 +146,6 @@ locals {
   )
 
   argocd_apps = {
-    addons    = file("${path.module}/bootstrap/addons.yaml")
     workloads = file("${path.module}/bootstrap/workloads.yaml")
   }
 
@@ -142,25 +156,54 @@ locals {
 }
 
 ################################################################################
-# GitOps Bridge: Bootstrap
+# GitOps Bridge: Bootstrap for Hub Cluster
 ################################################################################
-module "gitops_bridge_bootstrap" {
-  source = "gitops-bridge-dev/gitops-bridge/helm"
+module "gitops_bridge_bootstrap_hub" {
+  source = "github.com/gitops-bridge-dev/gitops-bridge-argocd-bootstrap-terraform?ref=v2.0.0"
 
+  # The ArgoCD remote cluster secret is deploy on hub cluster not on spoke clusters
+  providers = {
+    kubernetes = kubernetes.hub
+  }
+
+  install = false # We are not installing argocd via helm on hub cluster
   cluster = {
     cluster_name = module.eks.cluster_name
     environment  = local.environment
-    metadata = local.addons_metadata
-    addons   = local.addons
+    metadata     = local.addons_metadata
+    addons       = local.addons
+    server       = module.eks.cluster_endpoint
+    config       = <<-EOT
+      {
+        "tlsClientConfig": {
+          "insecure": false,
+          "caData" : "${module.eks.cluster_certificate_authority_data}"
+        },
+        "awsAuthConfig" : {
+          "clusterName": "${module.eks.cluster_name}",
+          "roleARN": "${aws_iam_role.spoke.arn}"
+        }
+      }
+    EOT
   }
+}
 
-  apps = local.argocd_apps
-  argocd = {
-    name = "argocd"
-    values = [file("${path.module}/argocd-initial-values.yaml")]
-    chart_version= "7.3.11"
+
+################################################################################
+# ArgoCD EKS Access
+################################################################################
+data "aws_iam_policy_document" "assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole","sts:TagSession"]
+    principals {
+      type        = "AWS"
+      identifiers = [data.terraform_remote_state.cluster_hub.outputs.argocd_iam_role_arn]
+    }
   }
-
+}
+resource "aws_iam_role" "spoke" {
+  name               = "${local.name}-argocd-spoke"
+  assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 }
 
 ################################################################################
@@ -218,21 +261,27 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  # manage_aws_auth_configmap = true
-  # aws_auth_roles = local.aws_addons.enable_karpenter ? [
-  #   # We need to add in the Karpenter node IAM role for nodes launched by Karpenter
-  #   {
-  #     rolearn  = module.eks_blueprints_addons.karpenter.node_iam_role_arn
-  #     username = "system:node:{{EC2PrivateDNSName}}"
-  #     groups = [
-  #       "system:bootstrappers",
-  #       "system:nodes",
-  #     ]
-  #   }
-  # ] : []
+
   enable_cluster_creator_admin_permissions = true
+
+  access_entries = {
+    # One access entry with a policy associated
+    example = {
+      principal_arn     = aws_iam_role.spoke.arn
+
+      policy_associations = {
+        argocd = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type       = "cluster"
+          }
+        }
+      }
+    }
+  }
+
   eks_managed_node_groups = {
-    initial = {
+    spoke = {
       instance_types = ["t3.medium"]
 
       min_size     = 1
@@ -247,6 +296,7 @@ module "eks" {
       } : {}
     }
   }
+
   # EKS Addons
   cluster_addons = {
     coredns = {}
@@ -263,7 +313,7 @@ module "eks" {
           ENABLE_PREFIX_DELEGATION = "true"
           WARM_PREFIX_TARGET       = "1"
         },
-        enableNetworkPolicy : "true"
+        enableNetworkPolicy = "true"
       })
     }
     aws-ebs-csi-driver = {
@@ -277,6 +327,7 @@ module "eks" {
     "karpenter.sh/discovery" = local.name
   })
 }
+
 module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "~> 5.20"
