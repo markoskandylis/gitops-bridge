@@ -61,5 +61,5 @@ variable "gitops_addons_path" {
 variable "platform_stack_version" {
   description = "Platform stack version"
   type        = string
-  default     = "hub-v1.30-v1.0.0"
+  default     = "hub-v1.30-v1.0.1"
 }

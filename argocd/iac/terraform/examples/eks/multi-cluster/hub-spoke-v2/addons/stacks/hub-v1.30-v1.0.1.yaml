@@ -1,4 +1,4 @@
-version: v1.30-v1.0.0
+version: v1.30-v1.0.1
 addons:
   argocd:
     chart: argo-cd
