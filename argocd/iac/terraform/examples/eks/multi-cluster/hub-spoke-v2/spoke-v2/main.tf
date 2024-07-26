@@ -45,6 +45,20 @@ provider "kubernetes" {
   }
 }
 
+provider "helm" {
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      # This requires the awscli to be installed locally where Terraform is executed
+      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", local.region]
+    }
+  }
+}
+
 
 locals {
   name   = "spoke-${terraform.workspace}"
@@ -110,6 +124,7 @@ locals {
     enable_secrets_store_csi_driver        = try(var.addons.enable_secrets_store_csi_driver, false)
     enable_vpa                             = try(var.addons.enable_vpa, false)
   }
+
   addons = merge(
     local.aws_addons,
     local.oss_addons,
@@ -121,7 +136,7 @@ locals {
     {
       aws_karpenter_role_name = "${module.eks.cluster_name}-karpenter"
     },
-    module.eks_blueprints_addons.gitops_metadata,
+      module.eks_blueprints_addons.gitops_metadata,
     {
       platform_stack_version = var.platform_stack_version
     },
@@ -136,6 +151,15 @@ locals {
       addons_repo_basepath = local.gitops_addons_basepath
       addons_repo_path     = local.gitops_addons_path
       addons_repo_revision = local.gitops_addons_revision
+    }
+  )
+
+  workload_metadata = merge(
+    {
+      aws_cluster_name = module.eks.cluster_name
+      aws_region       = local.region
+      aws_account_id   = data.aws_caller_identity.current.account_id
+      aws_vpc_id       = module.vpc.vpc_id
     },
     {
       workload_repo_url      = local.gitops_workload_url
@@ -145,7 +169,7 @@ locals {
     }
   )
 
-  argocd_apps = {
+  workload_apps = {
     workloads = file("${path.module}/bootstrap/workloads.yaml")
   }
 
@@ -186,6 +210,25 @@ module "gitops_bridge_bootstrap_hub" {
       }
     EOT
   }
+}
+
+module "gitops_bridge_bootstrap" {
+  source = "gitops-bridge-dev/gitops-bridge/helm"
+
+  cluster = {
+    cluster_name = module.eks.cluster_name
+    environment  = local.environment
+    metadata     = local.workload_metadata
+  }
+
+  apps = local.workload_apps
+  argocd = {
+    name          = "argocd"
+    values        = [file("${path.module}/argocd-initial-values.yaml")]
+    namespace     = "argocd"
+    chart_version = "7.3.11"
+  }
+
 }
 
 
