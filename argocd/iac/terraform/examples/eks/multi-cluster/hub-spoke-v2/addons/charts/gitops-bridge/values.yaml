@@ -101,5 +101,12 @@ applicationsets:
         valuesObject:
             clusterName: '{{.metadata.annotations.aws_cluster_name}}'
             nodeRole: '{{.metadata.annotations.karpenter_node_iam_role_name}}'
+  external-secrets:
+    enabled: true
+    selector:
+      matchExpressions:
+        - key: enable_external_secrets
+          operator: In
+          values: ['true']
 
 
