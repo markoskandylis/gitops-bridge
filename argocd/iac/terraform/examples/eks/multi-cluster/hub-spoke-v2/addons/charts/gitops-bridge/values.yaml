@@ -109,7 +109,7 @@ applicationsets:
           operator: In
           values: ['true']
       serviceAccount:
-        name: {{metadata.annotations.external_secrets_service_account}}
+        name: '{{.metadata.annotations.external_secrets_service_account}}'
     namespace: '.metadata.annotations.external-secrets'
 
 
