@@ -93,7 +93,6 @@ locals {
   addons = merge(
     local.aws_addons,
     local.oss_addons,
-    { cluster_type = local.cluster_type },
     { kubernetes_version = local.cluster_version },
     { aws_cluster_name = module.eks.cluster_name }
   )
@@ -105,6 +104,7 @@ locals {
     module.eks_blueprints_addons.gitops_metadata,
     {
       aws_cluster_name = module.eks.cluster_name
+      cluster_type = local.cluster_type,
       aws_region       = local.region
       aws_account_id   = data.aws_caller_identity.current.account_id
       aws_vpc_id       = module.vpc.vpc_id
