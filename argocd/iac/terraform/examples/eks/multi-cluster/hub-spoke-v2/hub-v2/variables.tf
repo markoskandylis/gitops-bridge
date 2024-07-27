@@ -24,11 +24,9 @@ variable "addons" {
   type        = any
   default = {
     enable_aws_load_balancer_controller = true
-    enable_aws_ebs_csi_resources        = false # generate gp2 and gp3 storage classes for ebs-csi
+    enable_aws_ebs_csi_resources        = true # generate gp2 and gp3 storage classes for ebs-csi
     enable_metrics_server               = true
-    enable_gatekeeper                   = false
-    enable_karpenter                    = false
-    enable_argocd                       = false
+    enable_external_secrets             = true
   }
 }
 # Addons Git

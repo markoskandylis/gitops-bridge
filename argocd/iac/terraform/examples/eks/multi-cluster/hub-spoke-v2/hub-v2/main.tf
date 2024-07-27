@@ -31,11 +31,11 @@ provider "kubernetes" {
 }
 
 locals {
-  name   = "getting-started"
+  name   = "hub"
   region = var.region
 
   environment = var.environment
-
+  cluster_type = "hub"
   cluster_version = var.kubernetes_version
 
   vpc_cidr = var.vpc_cidr
@@ -161,6 +161,9 @@ module "eks_blueprints_addons" {
 
   # Using GitOps Bridge
   create_kubernetes_resources = false
+  external_secrets = {
+    create_role = false
+  }
 
   # EKS Blueprints Addons
   enable_cert_manager                 = local.aws_addons.enable_cert_manager
@@ -283,49 +286,3 @@ module "vpc" {
 }
 
 
-################################################################################
-# ArgoCD EKS Access
-################################################################################
-data "aws_iam_policy_document" "eks_assume" {
-  statement {
-    effect = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["pods.eks.amazonaws.com"]
-    }
-    actions = ["sts:AssumeRole","sts:TagSession"]
-  }
-}
-resource "aws_iam_role" "argocd_hub" {
-  name               = "${module.eks.cluster_name}-argocd-hub"
-  assume_role_policy = data.aws_iam_policy_document.eks_assume.json
-}
-data "aws_iam_policy_document" "aws_assume_policy" {
-  statement {
-    effect    = "Allow"
-    resources = ["*"]
-    actions   = ["sts:AssumeRole","sts:TagSession"]
-  }
-}
-resource "aws_iam_policy" "aws_assume_policy" {
-  name        = "${module.eks.cluster_name}-argocd-aws-assume"
-  description = "IAM Policy for ArgoCD Hub"
-  policy      = data.aws_iam_policy_document.aws_assume_policy.json
-  tags        = local.tags
-}
-resource "aws_iam_role_policy_attachment" "aws_assume_policy" {
-  role       = aws_iam_role.argocd_hub.name
-  policy_arn = aws_iam_policy.aws_assume_policy.arn
-}
-resource "aws_eks_pod_identity_association" "argocd_app_controller" {
-  cluster_name    = module.eks.cluster_name
-  namespace       = "argocd"
-  service_account = "argocd-application-controller"
-  role_arn        = aws_iam_role.argocd_hub.arn
-}
-resource "aws_eks_pod_identity_association" "argocd_api_server" {
-  cluster_name    = module.eks.cluster_name
-  namespace       = "argocd"
-  service_account = "argocd-server"
-  role_arn        = aws_iam_role.argocd_hub.arn
-}

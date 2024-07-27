@@ -6,6 +6,7 @@
 {{- $repoURLValues := .Values.repoURLValues -}}
 {{- $repoURLValuesRevision := .Values.repoURLValuesRevision -}}
 {{- $repoURLValuesBasePath := .Values.repoURLValuesBasePath -}}
+{{- $clusterType := .Values.clusterType -}}
 {{- $project := .Values.project -}}
 {{- $syncPolicy := .Values.syncPolicy -}}
 {{- $stackPath := .Values.stackPath -}}
@@ -58,9 +59,9 @@ spec:
           releaseName: '{{`{{.addons.`}}{{ $name }}{{`.releaseName}}`}}'
           ignoreMissingValueFiles: true
           valueFiles:
-            - $values/{{ $repoURLValuesBasePath }}values/{{ $nameNormalize }}/common/values.yaml
-            - $values/{{ $repoURLValuesBasePath }}values/{{ $nameNormalize }}/{{`{{.metadata.labels.environment}}`}}/values.yaml
-            - $values/{{ $repoURLValuesBasePath }}values/{{ $nameNormalize }}/clusters/{{`{{.name}}`}}/values.yaml
+            - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/common/values.yaml
+            - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{`{{.metadata.labels.environment}}`}}/values.yaml
+            - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/clusters/{{`{{.name}}`}}/values.yaml
           {{- with $addon.values }}
           valuesObject:
             {{- toYaml . | nindent 12 }}
@@ -74,9 +75,9 @@ spec:
           releaseName: '{{`{{.addons.`}}{{ $name }}{{`.releaseName}}`}}'
           ignoreMissingValueFiles: true
           valueFiles:
-            - $values/{{ $repoURLValuesBasePath }}values/{{ $nameNormalize }}/common/resources/values.yaml
-            - $values/{{ $repoURLValuesBasePath }}values/{{ $nameNormalize }}/{{`{{.metadata.labels.environment}}`}}/resources/values.yaml
-            - $values/{{ $repoURLValuesBasePath }}values/{{ $nameNormalize }}/clusters/{{`{{.name}}`}}/resources/values.yaml
+            - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/common/resources/values.yaml
+            - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/{{`{{.metadata.labels.environment}}`}}/resources/values.yaml
+            - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/clusters/{{`{{.name}}`}}/resources/values.yaml
           {{- if $addon.resources.helm.valuesObject }}
           valuesObject:
             {{- toYaml $addon.resources.helm.valuesObject | nindent 12 }}

@@ -64,7 +64,7 @@ locals {
   name   = "spoke-${terraform.workspace}"
   environment = terraform.workspace
   region = var.region
-
+  cluster_type = "spoke"
   cluster_version = var.kubernetes_version
 
   vpc_cidr = var.vpc_cidr

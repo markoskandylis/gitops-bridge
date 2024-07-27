@@ -1,4 +1,5 @@
 stackPath: '**/hub-{{(.metadata.annotations.platform_stack_version | default "")}}.yaml'
+clusterType: "'{{.metadata.annotations.cluster_type}}'"
 repoURLGit: "'{{.metadata.annotations.addons_repo_url}}'"
 repoURLGitRevision: HEAD
 repoURLGitBasePath: "**"
@@ -100,5 +101,12 @@ applicationsets:
         valuesObject:
             clusterName: '{{.metadata.annotations.aws_cluster_name}}'
             nodeRole: '{{.metadata.annotations.karpenter_node_iam_role_name}}'
+  external-secrets:
+    enabled: true
+    selector:
+      matchExpressions:
+        - key: enable_external_secrets
+          operator: In
+          values: ['true']
 
 
