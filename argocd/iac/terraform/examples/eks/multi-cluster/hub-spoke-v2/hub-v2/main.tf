@@ -34,8 +34,8 @@ locals {
   name   = "hub"
   region = var.region
 
-  environment = var.environment
-  cluster_type = "hub"
+  environment     = var.environment
+  cluster_type    = "hub"
   cluster_version = var.kubernetes_version
 
   vpc_cidr = var.vpc_cidr
@@ -93,6 +93,7 @@ locals {
   addons = merge(
     local.aws_addons,
     local.oss_addons,
+    { cluster_type = local.cluster_type },
     { kubernetes_version = local.cluster_version },
     { aws_cluster_name = module.eks.cluster_name }
   )

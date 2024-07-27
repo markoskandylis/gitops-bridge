@@ -5,7 +5,7 @@ data "aws_iam_policy_document" "eks_assume" {
       type        = "Service"
       identifiers = ["pods.eks.amazonaws.com"]
     }
-    actions = ["sts:AssumeRole","sts:TagSession"]
+    actions = ["sts:AssumeRole", "sts:TagSession"]
   }
 }
 
@@ -13,7 +13,7 @@ data "aws_iam_policy_document" "aws_assume_policy" {
   statement {
     effect    = "Allow"
     resources = ["*"]
-    actions   = ["sts:AssumeRole","sts:TagSession"]
+    actions   = ["sts:AssumeRole", "sts:TagSession"]
   }
 }
 
