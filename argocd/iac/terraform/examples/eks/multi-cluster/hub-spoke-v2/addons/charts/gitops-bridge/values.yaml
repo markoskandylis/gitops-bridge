@@ -108,6 +108,6 @@ applicationsets:
         - key: enable_external_secrets
           operator: In
           values: ['true']
-    namespace: '.metadata.annotations.external_secrets_namespace'
+    namespace: 'addons.external_secrets_namespace'
 
 

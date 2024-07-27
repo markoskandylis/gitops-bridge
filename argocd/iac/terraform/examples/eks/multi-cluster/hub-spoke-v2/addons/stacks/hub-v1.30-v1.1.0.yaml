@@ -36,7 +36,7 @@ addons:
     repoUrl: public.ecr.aws
     targetRevision: "0.37.0"
     namespace: kube-system
-  external-secrets:
+  external_secrets:
     chart: external-secrets
     releaseName: external-secrets
     repoUrl: https://charts.external-secrets.io
