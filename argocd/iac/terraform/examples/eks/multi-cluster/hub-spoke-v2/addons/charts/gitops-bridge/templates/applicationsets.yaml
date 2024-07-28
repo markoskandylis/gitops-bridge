@@ -22,7 +22,7 @@ metadata:
   namespace: {{ $namespace }}
   {{- if $addon.syncWaveOrder}}
   annotations:
-    argocd.argoproj.io/sync-wave: "{{ $syncWaveOrder }}"
+    argocd.argoproj.io/sync-wave: "{{ $addon.syncWaveOrder }}"
   {{- end }}
 spec:
   syncPolicy:
