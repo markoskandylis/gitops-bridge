@@ -24,7 +24,10 @@ metadata:
   annotations:
     {{- if $addon.syncWaveOrder}}
     argocd.argoproj.io/sync-wave: "{{ $syncWaveOrder }}"
+    {{- else }}
+    {}
     {{- end }}
+
 spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
