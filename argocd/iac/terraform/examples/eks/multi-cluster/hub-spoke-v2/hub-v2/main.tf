@@ -101,6 +101,9 @@ locals {
     {
       platform_stack_version = var.platform_stack_version
     },
+    {
+      external_secrets_iam_role_arn = aws_iam_role.eso.arn
+    },
     module.eks_blueprints_addons.gitops_metadata,
     {
       aws_cluster_name = module.eks.cluster_name

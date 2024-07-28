@@ -110,5 +110,7 @@ applicationsets:
           operator: In
           values: ['true']
     namespace: '.metadata.annotations.external_secrets_namespace'
-
-
+    values: |
+      serviceAccount:
+        annotations:
+          eks.amazonaws.com/role-arn: '{{.metadata.annotations.external_secrets_iam_role_arn}}'

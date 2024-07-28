@@ -122,7 +122,7 @@ resource "aws_iam_role_policy_attachment" "eso" {
 resource "aws_eks_pod_identity_association" "eso_sa" {
   cluster_name    = module.eks.cluster_name
   namespace       = "external-secrets"
-  service_account = "external-secrets-sa"
+  service_account = "external-secrets"
   role_arn        = aws_iam_role.eso.arn
 }
 # resource "aws_eks_pod_identity_association" "argocd_api_server" {

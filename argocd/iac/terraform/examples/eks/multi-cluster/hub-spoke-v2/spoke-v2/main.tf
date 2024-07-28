@@ -216,7 +216,7 @@ module "gitops_bridge_bootstrap_hub" {
 
 
 resource "aws_secretsmanager_secret" "spoke_cluster_secret" {
-  name = "spoke-cluster-secret"
+  name = "hub/spoke-cluster-secret"
 }
 
 resource "aws_secretsmanager_secret_version" "spoke_cluster_secret_version" {
@@ -241,7 +241,6 @@ resource "aws_secretsmanager_secret_version" "spoke_cluster_secret_version" {
     }
   })
 }
-
 
 ################################################################################
 # GitOps Bridge: Bootstrap for Spoke Cluster
