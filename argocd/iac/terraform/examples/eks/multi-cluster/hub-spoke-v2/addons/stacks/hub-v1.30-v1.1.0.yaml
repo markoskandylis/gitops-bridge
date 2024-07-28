@@ -8,6 +8,7 @@ addons:
     namespace: argocd
   aws_load_balancer_controller:
     chart: aws-load-balancer-controller
+    syncWaveOrder: 1
     releaseName: aws-load-balancer-controller
     repoUrl: https://aws.github.io/eks-charts
     targetRevision: "1.7.1"

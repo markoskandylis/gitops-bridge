@@ -155,7 +155,7 @@ locals {
     }
   )
 
-  workload_metadata = merge(
+  workloads_metadata = merge(
     {
       aws_cluster_name = module.eks.cluster_name
       aws_region       = local.region
@@ -170,7 +170,7 @@ locals {
     }
   )
 
-  workload_apps = {
+  argocd_apps = {
     workloads = file("${path.module}/bootstrap/workloads.yaml")
   }
 
@@ -213,23 +213,59 @@ module "gitops_bridge_bootstrap_hub" {
   }
 }
 
-module "gitops_bridge_bootstrap" {
+
+resource "aws_secretsmanager_secret" "spoke_cluster_secret" {
+  name = "spoke-cluster-secret"
+}
+
+resource "aws_secretsmanager_secret_version" "spoke_cluster_secret_version" {
+  secret_id     = aws_secretsmanager_secret.spoke_cluster_secret.id
+  secret_string = jsonencode({
+    cluster = {
+      cluster_name = module.eks.cluster_name
+      environment  = local.environment
+      metadata     = local.addons_metadata
+      addons       = local.addons
+      server       = module.eks.cluster_endpoint
+      config = {
+        tlsClientConfig = {
+          insecure = false
+          caData   = base64decode(module.eks.cluster_certificate_authority_data)
+        }
+        awsAuthConfig = {
+          clusterName = module.eks.cluster_name
+          roleARN     = aws_iam_role.spoke.arn
+        }
+      }
+    }
+  })
+}
+
+
+################################################################################
+# GitOps Bridge: Bootstrap for Spoke Cluster
+################################################################################
+# Wait ArgoCD CRDs and "argocd" namespace to be created by hub cluster to this spoke cluster
+resource "time_sleep" "wait_for_argocd_namespace_and_crds" {
+  create_duration = "7m"
+
+  depends_on = [module.gitops_bridge_bootstrap_hub]
+}
+module "gitops_bridge_bootstrap_spoke" {
   source = "gitops-bridge-dev/gitops-bridge/helm"
 
+  install = false # Not installing argocd via helm on spoke cluster
   cluster = {
     cluster_name = module.eks.cluster_name
     environment  = local.environment
-    metadata     = local.workload_metadata
+    metadata     = local.workloads_metadata
+    addons = {
+      enable_argocd = false # ArgoCD is deploy from Hub Cluster
+    }
   }
+  apps = local.argocd_apps
 
-  apps = local.workload_apps
-  argocd = {
-    name          = "argocd"
-    values        = [file("${path.module}/argocd-initial-values.yaml")]
-    namespace     = "argocd"
-    chart_version = "7.3.11"
-  }
-
+  depends_on = [time_sleep.wait_for_argocd_namespace_and_crds]
 }
 
 
