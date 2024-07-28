@@ -45,7 +45,7 @@ spec:
     metadata:
       name: addon-{{ $nameNormalize }}{{ if $useSelector }}-{{`{{.name}}`}}{{ end }}
       annotations:
-        argocd.argoproj.io/manifest-generate-paths: {{ $repoURLValuesBasePath }}values/{{ $nameNormalize }}/common/values.yaml;{{ $repoURLValuesBasePath }}values/{{ $nameNormalize }}/{{`{{.metadata.labels.environment}}`}}/values.yaml;{{ $repoURLValuesBasePath }}values/{{ $nameNormalize }}/clusters/{{`{{.name}}`}}/values.yaml
+        argocd.argoproj.io/manifest-generate-paths: {{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/common/values.yaml;{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/{{`{{.metadata.labels.environment}}`}}/values.yaml;{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/clusters/{{`{{.name}}`}}/values.yaml
     spec:
       project: {{ $project }}
       sources:
