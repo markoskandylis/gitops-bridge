@@ -113,4 +113,4 @@ applicationsets:
     values: |
       serviceAccount:
         annotations:
-          eks.amazonaws.com/role-arn: '{{.metadata.annotations.external_secrets_role}}'
+          eks.amazonaws.com/role-arn: 'arn:aws:iam::568227374639:role/hub-eso'
