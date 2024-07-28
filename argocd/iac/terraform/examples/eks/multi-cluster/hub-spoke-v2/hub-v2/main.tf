@@ -99,10 +99,8 @@ locals {
 
   addons_metadata = merge(
     {
-      platform_stack_version = var.platform_stack_version
-    },
-    {
-      external_secrets_iam_role_arn = aws_iam_role.eso.arn
+      platform_stack_version = var.platform_stack_version,
+      external_secrets_role = aws_iam_role.eso.arn
     },
     module.eks_blueprints_addons.gitops_metadata,
     {
@@ -167,6 +165,7 @@ module "eks_blueprints_addons" {
   create_kubernetes_resources = false
   external_secrets = {
     create_role = false
+    service_account_name = "external-secrets"
   }
 
   # EKS Blueprints Addons
