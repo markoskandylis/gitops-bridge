@@ -73,7 +73,7 @@ spec:
       {{- if $addon.resources }}
       - repoURL: {{ $repoURLValues }}
         targetRevision: {{ $repoURLValuesRevision }}
-        path: '{{ $repoURLValuesBasePath }}values/{{ $nameNormalize }}/{{ $addon.resources.path }}resources'
+        path: '{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/{{ $addon.resources.path }}resources'
         {{- if $addon.resources.helm }}
         helm:
           releaseName: '{{`{{.addons.`}}{{ $name }}{{`.releaseName}}`}}'
