@@ -9,7 +9,6 @@
 {{- $clusterType := .Values.clusterType -}}
 {{- $project := .Values.project -}}
 {{- $syncPolicy := .Values.syncPolicy -}}
-{{- $syncWaveOrder := .Values.syncWaveOrder -}}
 {{- $stackPath := .Values.stackPath -}}
 {{- range $name, $addon := .Values.applicationsets }}
 {{- $nameNormalize := printf "%s" $name | replace "_" "-" | trunc 63 | trimSuffix "-"  -}}
