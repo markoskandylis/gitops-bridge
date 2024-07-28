@@ -10,7 +10,7 @@
 {{- $project := .Values.project -}}
 {{- $syncPolicy := .Values.syncPolicy -}}
 {{- $stackPath := .Values.stackPath -}}
-{{- $syncWaveOrder := .Values.syncWaveOrder -}}
+# {{- $syncWaveOrder := .Values.syncWaveOrder -}}
 {{- range $name, $addon := .Values.applicationsets }}
 {{- $nameNormalize := printf "%s" $name | replace "_" "-" | trunc 63 | trimSuffix "-" -}}
 {{- if $addon.enabled }}
@@ -21,10 +21,10 @@ kind: ApplicationSet
 metadata:
   name: {{ $nameNormalize }}
   namespace: {{ $namespace }}
-  annotations:
-    {{- if (hasKey $syncWaveOrder $name) }}
-    argocd.argoproj.io/sync-wave: "{{ index $syncWaveOrder $name }}"
-    {{- end }}
+  # annotations:
+  #   {{- if (hasKey $syncWaveOrder $name) }}
+  #   argocd.argoproj.io/sync-wave: "{{ index $syncWaveOrder $name }}"
+  #   {{- end }}
 spec:
   syncPolicy:
     preserveResourcesOnDeletion: true

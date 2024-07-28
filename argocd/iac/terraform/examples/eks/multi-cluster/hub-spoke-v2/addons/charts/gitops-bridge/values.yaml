@@ -19,8 +19,8 @@ syncPolicy:
   syncOptions:
     - CreateNamespace=true
     - ServerSideApply=true  # Big CRDs.
-syncWaveOrder:
-  aws_load_balancer_controller: 1
+# syncWaveOrder:
+#   aws_load_balancer_controller: 1
 applicationsets:
   argocd:
     enabled: true
