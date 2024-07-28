@@ -29,6 +29,7 @@ applicationsets:
           values: ['true']
     namespace: '.addons.argocd.namespace'
   aws_load_balancer_controller:
+    syncWaveOrder: 1
     enabled: true
     selector:
       matchExpressions:
