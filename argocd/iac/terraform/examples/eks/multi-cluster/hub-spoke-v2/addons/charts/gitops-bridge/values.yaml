@@ -113,5 +113,5 @@ applicationsets:
     values:
       serviceAccount:
         annotations:
-          name: '.metadata.annotations.external_secrets_service_account'
-          eks.amazonaws.com/role-arn: '.metadata.annotations.external_secrets_iam_role_arn'
+          name: '{{.metadata.annotations.external_secrets_service_account}}'
+          eks.amazonaws.com/role-arn: '{{.metadata.annotations.external_secrets_iam_role_arn}}'
