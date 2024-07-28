@@ -1,5 +1,5 @@
 stackPath: '**/hub-{{(.metadata.annotations.platform_stack_version | default "")}}.yaml'
-clusterType: "'{{.metadata.annotations.cluster_type}}'"
+clusterType: '{{.metadata.annotations.cluster_type}}'
 repoURLGit: "'{{.metadata.annotations.addons_repo_url}}'"
 repoURLGitRevision: HEAD
 repoURLGitBasePath: "**"

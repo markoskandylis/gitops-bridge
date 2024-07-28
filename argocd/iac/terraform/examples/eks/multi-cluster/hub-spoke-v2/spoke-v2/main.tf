@@ -142,7 +142,7 @@ locals {
     },
     {
       aws_cluster_name = module.eks.cluster_name
-      cluster_type = local.cluster_type,
+      cluster_type     = local.cluster_type,
       aws_region       = local.region
       aws_account_id   = data.aws_caller_identity.current.account_id
       aws_vpc_id       = module.vpc.vpc_id
@@ -159,6 +159,7 @@ locals {
     {
       aws_cluster_name = module.eks.cluster_name
       aws_region       = local.region
+      cluster_type     = local.cluster_type,
       aws_account_id   = data.aws_caller_identity.current.account_id
       aws_vpc_id       = module.vpc.vpc_id
     },
