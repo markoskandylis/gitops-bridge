@@ -21,13 +21,10 @@ kind: ApplicationSet
 metadata:
   name: {{ $nameNormalize }}
   namespace: {{ $namespace }}
+  {{- if $addon.syncWaveOrder}}
   annotations:
-    {{- if $addon.syncWaveOrder}}
     argocd.argoproj.io/sync-wave: "{{ $syncWaveOrder }}"
-    {{- else }}
-    {}
-    {{- end }}
-
+  {{- end }}
 spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
