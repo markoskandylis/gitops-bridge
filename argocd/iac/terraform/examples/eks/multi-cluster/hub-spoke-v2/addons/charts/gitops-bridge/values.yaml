@@ -101,13 +101,13 @@ applicationsets:
         valuesObject:
             clusterName: '{{.metadata.annotations.aws_cluster_name}}'
             nodeRole: '{{.metadata.annotations.karpenter_node_iam_role_name}}'
-  externalsecrets:
+  external_secrets:
     enabled: true
     selector:
       matchExpressions:
         - key: enable_external_secrets
           operator: In
           values: ['true']
-    namespace: 'addons.external_secrets_namespace'
+    namespace: '{{.metadata.annotations.external_secrets_namespace}}'
 
 
