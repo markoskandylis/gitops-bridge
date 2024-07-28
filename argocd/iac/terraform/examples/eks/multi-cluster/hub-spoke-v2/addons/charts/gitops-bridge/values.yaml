@@ -19,8 +19,6 @@ syncPolicy:
   syncOptions:
     - CreateNamespace=true
     - ServerSideApply=true  # Big CRDs.
-# syncWaveOrder:
-#   aws_load_balancer_controller: 1
 applicationsets:
   argocd:
     enabled: true
@@ -94,4 +92,22 @@ applicationsets:
       settings:
         clusterName: '{{.metadata.annotations.aws_cluster_name}}'
         interruptionQueue: '{{.metadata.annotations.karpenter_sqs_queue_name}}'
-     
+      serviceAccount:
+        name: '{{.metadata.annotations.karpenter_service_account}}'
+        annotations:
+          eks.amazonaws.com/role-arn: '{{.metadata.annotations.karpenter_iam_role_arn}}'
+    resources:
+      helm:
+        valuesObject:
+            clusterName: '{{.metadata.annotations.aws_cluster_name}}'
+            nodeRole: '{{.metadata.annotations.karpenter_node_iam_role_name}}'
+  externalsecrets:
+    enabled: true
+    selector:
+      matchExpressions:
+        - key: enable_external_secrets
+          operator: In
+          values: ['true']
+    namespace: 'addons.external_secrets_namespace'
+
+
