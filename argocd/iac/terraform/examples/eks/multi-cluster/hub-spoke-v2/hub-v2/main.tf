@@ -100,7 +100,6 @@ locals {
   addons_metadata = merge(
     {
       platform_stack_version = var.platform_stack_version,
-      external_secrets_role = aws_iam_role.eso.arn
     },
     module.eks_blueprints_addons.gitops_metadata,
     {
@@ -163,10 +162,7 @@ module "eks_blueprints_addons" {
 
   # Using GitOps Bridge
   create_kubernetes_resources = false
-  external_secrets = {
-    create_role = false
-    service_account_name = "external-secrets"
-  }
+  external_secrets_secrets_manager_arns = ["arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:${local.name}/*"]
 
   # EKS Blueprints Addons
   enable_cert_manager                 = local.aws_addons.enable_cert_manager
