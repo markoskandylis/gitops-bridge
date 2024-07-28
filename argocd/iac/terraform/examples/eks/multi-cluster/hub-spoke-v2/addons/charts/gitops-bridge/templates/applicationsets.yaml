@@ -12,7 +12,7 @@
 {{- $stackPath := .Values.stackPath -}}
 {{- $syncWaveOrder := .Values.syncWaveOrder -}}
 {{- range $name, $addon := .Values.applicationsets }}
-{{- $nameNormalize := printf "%s" $name | replace "_" "-" | trunc 63 | trimSuffix "-"  -}}
+{{- $nameNormalize := printf "%s" $name | replace "_" "-" | trunc 63 | trimSuffix "-" -}}
 {{- if $addon.enabled }}
 {{- with $addon -}}
 ---
@@ -45,49 +45,52 @@ spec:
               repoURL: {{ $repoURLGit }}
               revision: {{ $repoURLGitRevision }}
               files:
-              - path: '{{ $stackPath}}'
+                - path: '{{ $stackPath }}'
   template:
     metadata:
       name: addon-{{ $nameNormalize }}{{ if $useSelector }}-{{`{{.name}}`}}{{ end }}
       annotations:
-        argocd.argoproj.io/manifest-generate-paths: {{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/common/values.yaml;{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/{{`{{.metadata.labels.environment}}`}}/values.yaml;{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/clusters/{{`{{.name}}`}}/values.yaml
+        argocd.argoproj.io/manifest-generate-paths: |
+          {{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/common/values.yaml;
+          {{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/{{`{{.metadata.labels.environment}}`}}/values.yaml;
+          {{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/clusters/{{`{{.name}}`}}/values.yaml
     spec:
       project: {{ $project }}
       sources:
-      - repoURL: {{ $repoURLValues }}
-        targetRevision: {{ $repoURLValuesRevision }}
-        ref: values
-      - chart: '{{`{{.addons.`}}{{ $name }}{{`.chart}}`}}'
-        repoURL: '{{`{{.addons.`}}{{ $name }}{{`.repoUrl}}`}}'
-        targetRevision: '{{`{{.addons.`}}{{ $name }}{{`.targetRevision}}`}}'
-        helm:
-          releaseName: '{{`{{.addons.`}}{{ $name }}{{`.releaseName}}`}}'
-          ignoreMissingValueFiles: true
-          valueFiles:
-            - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/common/values.yaml
-            - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{`{{.metadata.labels.environment}}`}}/values.yaml
-            - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/clusters/{{`{{.name}}`}}/values.yaml
-          {{- with $addon.values }}
-          valuesObject:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+        - repoURL: {{ $repoURLValues }}
+          targetRevision: {{ $repoURLValuesRevision }}
+          ref: values
+        - chart: '{{`{{.addons.`}}{{ $name }}{{`.chart}}`}}'
+          repoURL: '{{`{{.addons.`}}{{ $name }}{{`.repoUrl}}`}}'
+          targetRevision: '{{`{{.addons.`}}{{ $name }}{{`.targetRevision}}`}}'
+          helm:
+            releaseName: '{{`{{.addons.`}}{{ $name }}{{`.releaseName}}`}}'
+            ignoreMissingValueFiles: true
+            valueFiles:
+              - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/common/values.yaml
+              - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{`{{.metadata.labels.environment}}`}}/values.yaml
+              - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/clusters/{{`{{.name}}`}}/values.yaml
+            {{- with $addon.values }}
+            valuesObject:
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
       {{- if $addon.resources }}
-      - repoURL: {{ $repoURLValues }}
-        targetRevision: {{ $repoURLValuesRevision }}
-        path: '{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/{{ $addon.resources.path }}resources'
-        {{- if $addon.resources.helm }}
-        helm:
-          releaseName: '{{`{{.addons.`}}{{ $name }}{{`.releaseName}}`}}'
-          ignoreMissingValueFiles: true
-          valueFiles:
-            - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/common/resources/values.yaml
-            - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/{{`{{.metadata.labels.environment}}`}}/resources/values.yaml
-            - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/clusters/{{`{{.name}}`}}/resources/values.yaml
-          {{- if $addon.resources.helm.valuesObject }}
-          valuesObject:
-            {{- toYaml $addon.resources.helm.valuesObject | nindent 12 }}
+        - repoURL: {{ $repoURLValues }}
+          targetRevision: {{ $repoURLValuesRevision }}
+          path: '{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/{{ $addon.resources.path }}resources'
+          {{- if $addon.resources.helm }}
+          helm:
+            releaseName: '{{`{{.addons.`}}{{ $name }}{{`.releaseName}}`}}'
+            ignoreMissingValueFiles: true
+            valueFiles:
+              - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{ $nameNormalize }}/common/resources/values.yaml
+              - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/{{`{{.metadata.labels.environment}}`}}/resources/values.yaml
+              - $values/{{ $repoURLValuesBasePath }}values/{{ $clusterType }}/clusters/{{`{{.name}}`}}/resources/values.yaml
+            {{- if $addon.resources.helm.valuesObject }}
+            valuesObject:
+              {{- toYaml $addon.resources.helm.valuesObject | nindent 12 }}
+            {{- end }}
           {{- end }}
-        {{- end }}
       {{- end }}
       destination:
         namespace: '{{`{{`}}{{ $addon.namespace }}{{`}}`}}'
