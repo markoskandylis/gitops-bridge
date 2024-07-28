@@ -219,28 +219,27 @@ resource "aws_secretsmanager_secret" "spoke_cluster_secret" {
   name = "hub/spoke-cluster-secret"
 }
 
-resource "aws_secretsmanager_secret_version" "spoke_cluster_secret_version" {
-  secret_id     = aws_secretsmanager_secret.spoke_cluster_secret.id
+resource "aws_secretsmanager_secret_version" "argocd_cluster_secret_version" {
+  secret_id = aws_secretsmanager_secret.spoke_cluster_secret.id
   secret_string = jsonencode({
-    cluster = {
-      cluster_name = module.eks.cluster_name
-      environment  = local.environment
-      metadata     = local.addons_metadata
-      addons       = local.addons
-      server       = module.eks.cluster_endpoint
-      config = {
-        tlsClientConfig = {
-          insecure = false
-          caData   = base64decode(module.eks.cluster_certificate_authority_data)
-        }
-        awsAuthConfig = {
-          clusterName = module.eks.cluster_name
-          roleARN     = aws_iam_role.spoke.arn
-        }
+    cluster_name = module.eks.cluster_name,
+    metadata     = local.addons_metadata
+    addons       = local.addons
+    server = module.eks.cluster_endpoint
+    environment  = local.environment
+    config = {
+      tlsClientConfig = {
+        insecure = false,
+        caData = module.eks.cluster_certificate_authority_data
+      },
+      awsAuthConfig = {
+        clusterName = module.eks.cluster_name,
+        roleARN = aws_iam_role.spoke.arn
       }
     }
   })
 }
+
 
 ################################################################################
 # GitOps Bridge: Bootstrap for Spoke Cluster
