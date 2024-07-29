@@ -15,20 +15,8 @@ data "aws_caller_identity" "current" {}
 data "aws_availability_zones" "available" {}
 data "aws_ssm_parameter" "argocd_hub_role" {
   provider = aws.hub-account
-  name = "argocd-hub-role"
+  name     = "argocd-hub-role"
 }
-
-# output "name" {
-#   value = data.aws_ssm_parameter.argocd_hub_role.value
-#   sensitive = true
-# }
-# data "terraform_remote_state" "cluster_hub" {
-#   backend = "local"
-
-#   config = {
-#     path = "${path.module}/../hub-v2/terraform.tfstate"
-#   }
-# }
 
 ################################################################################
 # Kubernetes Access for Spoke Cluster
@@ -60,12 +48,11 @@ provider "helm" {
   }
 }
 
-
 locals {
-  name   = "spoke-${terraform.workspace}"
-  environment = terraform.workspace
-  region = var.region
-  cluster_type = "spoke"
+  name            = "spoke-${terraform.workspace}"
+  environment     = terraform.workspace
+  region          = var.region
+  cluster_type    = "spoke"
   cluster_version = var.kubernetes_version
 
   vpc_cidr = var.vpc_cidr
@@ -108,6 +95,7 @@ locals {
     enable_ack_sfn                               = try(var.addons.enable_ack_sfn, false)
     enable_ack_eventbridge                       = try(var.addons.enable_ack_eventbridge, false)
   }
+
   oss_addons = {
     enable_argocd                          = try(var.addons.enable_argocd, true)
     enable_argo_rollouts                   = try(var.addons.enable_argo_rollouts, false)
@@ -137,7 +125,7 @@ locals {
     {
       aws_karpenter_role_name = "${module.eks.cluster_name}-karpenter"
     },
-      module.eks_blueprints_addons.gitops_metadata,
+    module.eks_blueprints_addons.gitops_metadata,
     {
       platform_stack_version = var.platform_stack_version
     },
@@ -183,33 +171,32 @@ locals {
 }
 
 resource "aws_secretsmanager_secret" "spoke_cluster_secret" {
-  provider = aws.hub-account
-  name = "hub/spoke-${terraform.workspace}-0"
+  provider                = aws.hub-account
+  name                    = "hub/spoke-${terraform.workspace}-1"
   recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "argocd_cluster_secret_version" {
-  provider = aws.hub-account
+  provider  = aws.hub-account
   secret_id = aws_secretsmanager_secret.spoke_cluster_secret.id
   secret_string = jsonencode({
     cluster_name = module.eks.cluster_name
     environment  = local.environment
     metadata     = local.addons_metadata
     addons       = local.addons
-    server = module.eks.cluster_endpoint
+    server       = module.eks.cluster_endpoint
     config = {
       tlsClientConfig = {
         insecure = false,
-        caData = module.eks.cluster_certificate_authority_data
+        caData   = module.eks.cluster_certificate_authority_data
       },
       awsAuthConfig = {
         clusterName = module.eks.cluster_name,
-        roleARN = aws_iam_role.spoke.arn
+        roleARN     = aws_iam_role.spoke.arn
       }
     }
   })
 }
-
 
 ################################################################################
 # GitOps Bridge: Bootstrap for Spoke Cluster
@@ -244,7 +231,7 @@ module "gitops_bridge_bootstrap_spoke" {
 ################################################################################
 data "aws_iam_policy_document" "assume_role_policy" {
   statement {
-    actions = ["sts:AssumeRole","sts:TagSession"]
+    actions = ["sts:AssumeRole", "sts:TagSession"]
     principals {
       type        = "AWS"
       identifiers = [data.aws_ssm_parameter.argocd_hub_role.value]
@@ -316,14 +303,14 @@ module "eks" {
 
   access_entries = {
     # One access entry with a policy associated
-    example = {
-      principal_arn     = aws_iam_role.spoke.arn
+    argocd = {
+      principal_arn = aws_iam_role.spoke.arn
 
       policy_associations = {
         argocd = {
           policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
           access_scope = {
-            type       = "cluster"
+            type = "cluster"
           }
         }
       }
@@ -339,9 +326,9 @@ module "eks" {
       desired_size = 2
       taints = local.aws_addons.enable_karpenter ? {
         dedicated = {
-          key    = "CriticalAddonsOnly"
-          operator   = "Exists"
-          effect    = "NO_SCHEDULE"
+          key      = "CriticalAddonsOnly"
+          operator = "Exists"
+          effect   = "NO_SCHEDULE"
         }
       } : {}
     }
@@ -349,7 +336,7 @@ module "eks" {
 
   # EKS Addons
   cluster_addons = {
-    coredns = {}
+    coredns    = {}
     kube-proxy = {}
     vpc-cni = {
       # Specify the VPC CNI addon should be deployed before compute to ensure
@@ -426,13 +413,12 @@ module "vpc" {
   tags = local.tags
 }
 
-
-# resource "aws_eks_access_entry" "karpenter_node_access_entry" {
-#   cluster_name      = module.eks.cluster_name
-#   principal_arn     = module.eks_blueprints_addons.karpenter.node_iam_role_arn
-#   kubernetes_groups = []
-#   type              = "EC2_LINUX"
-#   lifecycle {
-#     ignore_changes = [kubernetes_groups]
-#   }
-# }
+resource "aws_eks_access_entry" "karpenter_node_access_entry" {
+  cluster_name      = module.eks.cluster_name
+  principal_arn     = module.eks_blueprints_addons.karpenter.node_iam_role_arn
+  kubernetes_groups = []
+  type              = "EC2_LINUX"
+  lifecycle {
+    ignore_changes = [kubernetes_groups]
+  }
+}

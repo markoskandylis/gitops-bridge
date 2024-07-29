@@ -103,11 +103,11 @@ locals {
     },
     module.eks_blueprints_addons.gitops_metadata,
     {
-      aws_cluster_name = module.eks.cluster_name
-      cluster_type = local.cluster_type,
-      aws_region       = local.region
-      aws_account_id   = data.aws_caller_identity.current.account_id
-      aws_vpc_id       = module.vpc.vpc_id
+      aws_cluster_name              = module.eks.cluster_name
+      cluster_type                  = local.cluster_type,
+      aws_region                    = local.region
+      aws_account_id                = data.aws_caller_identity.current.account_id
+      aws_vpc_id                    = module.vpc.vpc_id
       external_secrets_iam_role_arn = aws_iam_role.eso.arn
     },
     {

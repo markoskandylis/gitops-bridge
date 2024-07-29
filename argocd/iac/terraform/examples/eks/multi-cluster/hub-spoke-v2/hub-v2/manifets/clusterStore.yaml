@@ -2,6 +2,7 @@ apiVersion: external-secrets.io/v1beta1
 kind: ClusterSecretStore
 metadata:
   name: aws-secrets-manager
+  namespace: external-secrets
 spec:
   provider:
     aws:
@@ -9,8 +10,3 @@ spec:
       region: us-west-2
       secretsManager:
         forceDeleteWithoutRecovery: true
-      auth:
-        jwt:
-          serviceAccountRef:
-            name: external-secrets-sa
-            namespace: external-secrets
