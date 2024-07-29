@@ -13,23 +13,6 @@ data "terraform_remote_state" "cluster_hub" {
 }
 
 ################################################################################
-# Kubernetes Access for Hub Cluster
-################################################################################
-
-provider "kubernetes" {
-  host                   = data.terraform_remote_state.cluster_hub.outputs.cluster_endpoint
-  cluster_ca_certificate = base64decode(data.terraform_remote_state.cluster_hub.outputs.cluster_certificate_authority_data)
-
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "aws"
-    # This requires the awscli to be installed locally where Terraform is executed
-    args = ["eks", "get-token", "--cluster-name", data.terraform_remote_state.cluster_hub.outputs.cluster_name, "--region", data.terraform_remote_state.cluster_hub.outputs.cluster_region]
-  }
-  alias = "hub"
-}
-
-################################################################################
 # Kubernetes Access for Spoke Cluster
 ################################################################################
 
@@ -181,52 +164,19 @@ locals {
   }
 }
 
-################################################################################
-# GitOps Bridge: Bootstrap for Hub Cluster
-################################################################################
-module "gitops_bridge_bootstrap_hub" {
-  source = "github.com/gitops-bridge-dev/gitops-bridge-argocd-bootstrap-terraform?ref=v2.0.0"
-
-  # The ArgoCD remote cluster secret is deploy on hub cluster not on spoke clusters
-  providers = {
-    kubernetes = kubernetes.hub
-  }
-
-  install = false # We are not installing argocd via helm on hub cluster
-  cluster = {
-    cluster_name = module.eks.cluster_name
-    environment  = local.environment
-    metadata     = local.addons_metadata
-    addons       = local.addons
-    server       = module.eks.cluster_endpoint
-    config       = <<-EOT
-      {
-        "tlsClientConfig": {
-          "insecure": false,
-          "caData" : "${module.eks.cluster_certificate_authority_data}"
-        },
-        "awsAuthConfig" : {
-          "clusterName": "${module.eks.cluster_name}",
-          "roleARN": "${aws_iam_role.spoke.arn}"
-        }
-      }
-    EOT
-  }
-}
-
-
 resource "aws_secretsmanager_secret" "spoke_cluster_secret" {
-  name = "hub/spoke-cluster-secret"
+  name = "hub/spoke-${terraform.workspace}-0"
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "argocd_cluster_secret_version" {
   secret_id = aws_secretsmanager_secret.spoke_cluster_secret.id
   secret_string = jsonencode({
-    cluster_name = module.eks.cluster_name,
+    cluster_name = module.eks.cluster_name
+    environment  = local.environment
     metadata     = local.addons_metadata
     addons       = local.addons
     server = module.eks.cluster_endpoint
-    environment  = local.environment
     config = {
       tlsClientConfig = {
         insecure = false,
@@ -248,7 +198,7 @@ resource "aws_secretsmanager_secret_version" "argocd_cluster_secret_version" {
 resource "time_sleep" "wait_for_argocd_namespace_and_crds" {
   create_duration = "7m"
 
-  depends_on = [module.gitops_bridge_bootstrap_hub]
+  depends_on = [aws_secretsmanager_secret_version.argocd_cluster_secret_version]
 }
 module "gitops_bridge_bootstrap_spoke" {
   source = "gitops-bridge-dev/gitops-bridge/helm"
