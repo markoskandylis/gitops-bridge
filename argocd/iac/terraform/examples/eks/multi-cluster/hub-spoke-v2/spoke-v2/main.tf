@@ -1,16 +1,34 @@
 provider "aws" {
-  region = local.region
+  region = "us-west-2"
 }
-data "aws_caller_identity" "current" {}
-data "aws_availability_zones" "available" {}
 
-data "terraform_remote_state" "cluster_hub" {
-  backend = "local"
-
-  config = {
-    path = "${path.module}/../hub-v2/terraform.tfstate"
+provider "aws" {
+  region = "us-west-2"
+  alias  = "hub-account"
+  assume_role {
+    role_arn     = "arn:aws:iam::568227374639:role/argocd-cross-account-role"
+    session_name = "cross-account-session"
   }
 }
+
+data "aws_caller_identity" "current" {}
+data "aws_availability_zones" "available" {}
+data "aws_ssm_parameter" "argocd_hub_role" {
+  provider = aws.hub-account
+  name = "argocd-hub-role"
+}
+
+# output "name" {
+#   value = data.aws_ssm_parameter.argocd_hub_role.value
+#   sensitive = true
+# }
+# data "terraform_remote_state" "cluster_hub" {
+#   backend = "local"
+
+#   config = {
+#     path = "${path.module}/../hub-v2/terraform.tfstate"
+#   }
+# }
 
 ################################################################################
 # Kubernetes Access for Spoke Cluster
@@ -165,11 +183,13 @@ locals {
 }
 
 resource "aws_secretsmanager_secret" "spoke_cluster_secret" {
+  provider = aws.hub-account
   name = "hub/spoke-${terraform.workspace}-0"
   recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "argocd_cluster_secret_version" {
+  provider = aws.hub-account
   secret_id = aws_secretsmanager_secret.spoke_cluster_secret.id
   secret_string = jsonencode({
     cluster_name = module.eks.cluster_name
@@ -200,6 +220,7 @@ resource "time_sleep" "wait_for_argocd_namespace_and_crds" {
 
   depends_on = [aws_secretsmanager_secret_version.argocd_cluster_secret_version]
 }
+
 module "gitops_bridge_bootstrap_spoke" {
   source = "gitops-bridge-dev/gitops-bridge/helm"
 
@@ -226,7 +247,7 @@ data "aws_iam_policy_document" "assume_role_policy" {
     actions = ["sts:AssumeRole","sts:TagSession"]
     principals {
       type        = "AWS"
-      identifiers = [data.terraform_remote_state.cluster_hub.outputs.argocd_iam_role_arn]
+      identifiers = [data.aws_ssm_parameter.argocd_hub_role.value]
     }
   }
 }
@@ -404,3 +425,14 @@ module "vpc" {
 
   tags = local.tags
 }
+
+
+# resource "aws_eks_access_entry" "karpenter_node_access_entry" {
+#   cluster_name      = module.eks.cluster_name
+#   principal_arn     = module.eks_blueprints_addons.karpenter.node_iam_role_arn
+#   kubernetes_groups = []
+#   type              = "EC2_LINUX"
+#   lifecycle {
+#     ignore_changes = [kubernetes_groups]
+#   }
+# }

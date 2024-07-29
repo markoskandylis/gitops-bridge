@@ -1,0 +1,97 @@
+{
+    "addons": {
+        "aws_cluster_name": "spoke-dev",
+        "enable_ack_apigatewayv2": false,
+        "enable_ack_dynamodb": false,
+        "enable_ack_emrcontainers": false,
+        "enable_ack_eventbridge": false,
+        "enable_ack_prometheusservice": false,
+        "enable_ack_rds": false,
+        "enable_ack_s3": false,
+        "enable_ack_sfn": false,
+        "enable_argo_events": false,
+        "enable_argo_rollouts": false,
+        "enable_argo_workflows": false,
+        "enable_argocd": true,
+        "enable_aws_cloudwatch_metrics": false,
+        "enable_aws_ebs_csi_resources": false,
+        "enable_aws_efs_csi_driver": false,
+        "enable_aws_for_fluentbit": false,
+        "enable_aws_fsx_csi_driver": false,
+        "enable_aws_gateway_api_controller": false,
+        "enable_aws_load_balancer_controller": true,
+        "enable_aws_node_termination_handler": false,
+        "enable_aws_privateca_issuer": false,
+        "enable_aws_secrets_store_csi_driver_provider": false,
+        "enable_cert_manager": false,
+        "enable_cluster_autoscaler": false,
+        "enable_cluster_proportional_autoscaler": false,
+        "enable_external_dns": false,
+        "enable_external_secrets": false,
+        "enable_fargate_fluentbit": false,
+        "enable_gatekeeper": false,
+        "enable_gpu_operator": false,
+        "enable_ingress_nginx": false,
+        "enable_karpenter": true,
+        "enable_keda": false,
+        "enable_kube_prometheus_stack": false,
+        "enable_kyverno": false,
+        "enable_metrics_server": true,
+        "enable_prometheus_adapter": false,
+        "enable_secrets_store_csi_driver": false,
+        "enable_velero": false,
+        "enable_vpa": false,
+        "kubernetes_version": "1.30"
+    },
+    "cluster_name": "spoke-dev",
+    "config": {
+        "awsAuthConfig": {
+            "clusterName": "spoke-dev",
+            "roleARN": "arn:aws:iam::568227374639:role/spoke-dev-argocd-spoke"
+        },
+        "tlsClientConfig": {
+            "caData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJQXhHSWErcDJydEF3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TkRBM01qa3dPVFExTkRsYUZ3MHpOREEzTWpjd09UVXdORGxhTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUURrUFFqbzBrVDJKOHpmLzVzdkV0c2s0VWhMTm03RnMzamNuaGNsUm90UDJFTFF3QmNwWklqQUM3WDkKaWNjK0NYMTdWdlVWT0NZSjRPVytpeDNJU3Zod0RNZzNpM2xMTUFQTjlGNVVNSGNZQW9BK1B1V2R5OUl6cTZhQwptY3NsKzhQV3FjY1dlRVh6dnViNDVBMHB5VTZDeTg2Sk1odFlYMktkRzViYzRPMlBLSXc5RlFxd09OTXRCaGdaCjdCUW8vRGIxSXQ4RlozOW1WMk96UVhRNmVPN05ZV3crbzF4ZHBQTGxCUytCbTF0L2s3VEZ1cDluRWl0aFM4VHgKYWM1d0NXN2ZyMlhIajBwcDRPUjQvby9yNUM3Y2hwR3Y5OGZDdzdaRG11SDB6eEpUN3poT1BjbE9XbUJpeE5QYQo1TE9rU3g0dDYvQ2ZQQktDeVpQNXRQVFZqZ1BmQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJSMFBqblZ6MEQ3UnEyTTBCaWtMaFgvQ2tkMGFEQVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQXF1VTREejROcAp3K0U0bUljODNWelFaazF0ZjBmNTlsZ0NIcmZDMVJ0d3ZLSjY3N0d1dFBBbFZRVVovUG5yTzAwcThuczYvOVBxCkhEQ2RVT0t6ZkwvVVpOUFRQSjdMWVJpSXA0V1BEQXRmL05WRTAyaThFM1RlQldmdktXQlFEVFloaEZoS0YyZUwKNlRCNWYyVndjMW04MDNYMHlHLzVVM1g4NHc2eUFSYlZ1Y3ZWb0lFQ1kyMEIxSWMvSUUrcjZTUk9Td0syUG5OcwpodDAyMDQzMC9VZms4aHNSWnRLekZUZmVDbGtXcHlqaGl2QjdoY05sQ1pjOEY4MjZML1J6OEh4b0x2elY4R000CkowcDBVa2s4VHZiMmppUHpRY0JjUmdQcEJRZVJaZElHR2FMVG9nUTRMSEt2dDgwN0k2bElTWFJ0QVU0b3ZlSGQKbXhHQTNNaFEvbXdTCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K",
+            "insecure": false
+        }
+    },
+    "environment": "dev",
+    "metadata": {
+        "addons_repo_basepath": "argocd/iac/terraform/examples/eks/multi-cluster/hub-spoke-v2/addons/",
+        "addons_repo_path": "",
+        "addons_repo_revision": "gitops-v2",
+        "addons_repo_url": "https://github.com/markoskandylis//gitops-bridge",
+        "aws_account_id": "568227374639",
+        "aws_cluster_name": "spoke-dev",
+        "aws_karpenter_role_name": "spoke-dev-karpenter",
+        "aws_load_balancer_controller_iam_role_arn": "arn:aws:iam::568227374639:role/alb-controller-20240729095536308800000021",
+        "aws_load_balancer_controller_namespace": "kube-system",
+        "aws_load_balancer_controller_service_account": "aws-load-balancer-controller-sa",
+        "aws_region": "us-west-2",
+        "aws_vpc_id": "vpc-0e33e20958c9a8668",
+        "cluster_type": "spoke",
+        "karpenter_iam_role_arn": "arn:aws:iam::568227374639:role/karpenter-20240729095536309300000022",
+        "karpenter_namespace": "karpenter",
+        "karpenter_node_iam_role_name": "karpenter-spoke-dev",
+        "karpenter_node_instance_profile_name": "karpenter-spoke-dev",
+        "karpenter_service_account": "karpenter",
+        "karpenter_sqs_queue_name": "karpenter-spoke-dev",
+        "platform_stack_version": "v1.30-v1.1.0"
+    },
+    "server": "https://A82833D77A8CF453B124C495028F1D09.gr7.us-west-2.eks.amazonaws.com"
+}
+
+
+
+
+
+
+{
+    "awsAuthConfig": {
+        "clusterName": "spoke-dev",
+        "roleARN": "arn:aws:iam::568227374639:role/spoke-dev-argocd-spoke"
+    },
+    "tlsClientConfig": {
+        "caData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJQXhHSWErcDJydEF3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TkRBM01qa3dPVFExTkRsYUZ3MHpOREEzTWpjd09UVXdORGxhTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUURrUFFqbzBrVDJKOHpmLzVzdkV0c2s0VWhMTm03RnMzamNuaGNsUm90UDJFTFF3QmNwWklqQUM3WDkKaWNjK0NYMTdWdlVWT0NZSjRPVytpeDNJU3Zod0RNZzNpM2xMTUFQTjlGNVVNSGNZQW9BK1B1V2R5OUl6cTZhQwptY3NsKzhQV3FjY1dlRVh6dnViNDVBMHB5VTZDeTg2Sk1odFlYMktkRzViYzRPMlBLSXc5RlFxd09OTXRCaGdaCjdCUW8vRGIxSXQ4RlozOW1WMk96UVhRNmVPN05ZV3crbzF4ZHBQTGxCUytCbTF0L2s3VEZ1cDluRWl0aFM4VHgKYWM1d0NXN2ZyMlhIajBwcDRPUjQvby9yNUM3Y2hwR3Y5OGZDdzdaRG11SDB6eEpUN3poT1BjbE9XbUJpeE5QYQo1TE9rU3g0dDYvQ2ZQQktDeVpQNXRQVFZqZ1BmQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJSMFBqblZ6MEQ3UnEyTTBCaWtMaFgvQ2tkMGFEQVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQXF1VTREejROcAp3K0U0bUljODNWelFaazF0ZjBmNTlsZ0NIcmZDMVJ0d3ZLSjY3N0d1dFBBbFZRVVovUG5yTzAwcThuczYvOVBxCkhEQ2RVT0t6ZkwvVVpOUFRQSjdMWVJpSXA0V1BEQXRmL05WRTAyaThFM1RlQldmdktXQlFEVFloaEZoS0YyZUwKNlRCNWYyVndjMW04MDNYMHlHLzVVM1g4NHc2eUFSYlZ1Y3ZWb0lFQ1kyMEIxSWMvSUUrcjZTUk9Td0syUG5OcwpodDAyMDQzMC9VZms4aHNSWnRLekZUZmVDbGtXcHlqaGl2QjdoY05sQ1pjOEY4MjZML1J6OEh4b0x2elY4R000CkowcDBVa2s4VHZiMmppUHpRY0JjUmdQcEJRZVJaZElHR2FMVG9nUTRMSEt2dDgwN0k2bElTWFJ0QVU0b3ZlSGQKbXhHQTNNaFEvbXdTCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K",
+        "insecure": false
+    }
+}%

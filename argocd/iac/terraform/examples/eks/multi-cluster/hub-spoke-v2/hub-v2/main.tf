@@ -108,6 +108,7 @@ locals {
       aws_region       = local.region
       aws_account_id   = data.aws_caller_identity.current.account_id
       aws_vpc_id       = module.vpc.vpc_id
+      external_secrets_iam_role_arn = aws_iam_role.eso.arn
     },
     {
       addons_repo_url      = local.gitops_addons_url
@@ -162,7 +163,9 @@ module "eks_blueprints_addons" {
 
   # Using GitOps Bridge
   create_kubernetes_resources = false
-  external_secrets_secrets_manager_arns = ["arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:${local.name}/*"]
+  external_secrets = {
+    create_role = false
+  }
 
   # EKS Blueprints Addons
   enable_cert_manager                 = local.aws_addons.enable_cert_manager
@@ -285,3 +288,8 @@ module "vpc" {
 }
 
 
+resource "aws_ssm_parameter" "argocd_hub_role" {
+  name  = "argocd-hub-role"
+  type  = "String"
+  value = aws_iam_role.argocd_hub.arn
+}

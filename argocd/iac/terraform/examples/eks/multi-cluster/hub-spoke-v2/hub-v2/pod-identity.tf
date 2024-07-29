@@ -56,78 +56,72 @@ resource "aws_eks_pod_identity_association" "argocd_api_server" {
 # ESO EKS Access
 ################################################################################
 
-# resource "aws_iam_role" "eso" {
-#   name               = "${module.eks.cluster_name}-eso"
-#   assume_role_policy = data.aws_iam_policy_document.eks_assume.json
-# }
+resource "aws_iam_role" "eso" {
+  name               = "${module.eks.cluster_name}-eso"
+  assume_role_policy = data.aws_iam_policy_document.eks_assume.json
+}
 
-# data "aws_iam_policy_document" "eso" {
-#   statement {
-#     effect    = "Allow"
-#     actions   = ["secretsmanager:ListSecrets"]
-#     resources = ["*"]
-#   }
+data "aws_iam_policy_document" "eso" {
+  statement {
+    effect    = "Allow"
+    actions   = ["secretsmanager:ListSecrets"]
+    resources = ["*"]
+  }
 
-#   statement {
-#     actions   = ["ssm:DescribeParameters"]
-#     resources = ["*"]
-#   }
+  statement {
+    actions   = ["ssm:DescribeParameters"]
+    resources = ["*"]
+  }
 
-#   statement {
-#     effect = "Allow"
-#     actions = [
-#       "secretsmanager:GetResourcePolicy",
-#       "secretsmanager:GetSecretValue",
-#       "secretsmanager:DescribeSecret",
-#     "secretsmanager:ListSecretVersionIds"]
-#     resources = [
-#       "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:${local.name}/*",
-#     ]
-#   }
-#   statement {
-#     effect = "Allow"
-#     actions = [
-#     "kms:Decrypt", ]
-#     resources = [
-#       "arn:aws:kms:${var.region}:${data.aws_caller_identity.current.account_id}:key/*",
-#     ]
-#   }
-#   statement {
-#     effect = "Allow"
-#     actions = [
-#       "ssm:GetParameter",
-#     "ssm:GetParameters", ]
-#     resources = [
-#       "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter/${local.name}/*",
-#     ]
-#   }
-# }
+  statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetResourcePolicy",
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret",
+    "secretsmanager:ListSecretVersionIds"]
+    resources = [
+      "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:${local.name}/*",
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+    "kms:Decrypt", ]
+    resources = [
+      "arn:aws:kms:${var.region}:${data.aws_caller_identity.current.account_id}:key/*",
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "ssm:GetParameter",
+    "ssm:GetParameters", ]
+    resources = [
+      "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter/${local.name}/*",
+    ]
+  }
+}
 
 # ## Create the IAM policy with the document created above
-# resource "aws_iam_policy" "eso" {
-#   name   = "${module.eks.cluster_name}-eso"
-#   policy = data.aws_iam_policy_document.eso.json
-# }
+resource "aws_iam_policy" "eso" {
+  name   = "${module.eks.cluster_name}-eso"
+  policy = data.aws_iam_policy_document.eso.json
+}
 
-# resource "aws_iam_role_policy_attachment" "eso_aws_assume_policy" {
-#   role       = aws_iam_role.eso.name
-#   policy_arn = aws_iam_policy.aws_assume_policy.arn
-# }
+resource "aws_iam_role_policy_attachment" "eso_aws_assume_policy" {
+  role       = aws_iam_role.eso.name
+  policy_arn = aws_iam_policy.aws_assume_policy.arn
+}
 
-# resource "aws_iam_role_policy_attachment" "eso" {
-#   role       = aws_iam_role.eso.name
-#   policy_arn = aws_iam_policy.eso.arn
-# }
+resource "aws_iam_role_policy_attachment" "eso" {
+  role       = aws_iam_role.eso.name
+  policy_arn = aws_iam_policy.eso.arn
+}
 
-# resource "aws_eks_pod_identity_association" "eso_sa" {
-#   cluster_name    = module.eks.cluster_name
-#   namespace       = "external-secrets"
-#   service_account = "external-secrets"
-#   role_arn        = aws_iam_role.eso.arn
-# }
-# # resource "aws_eks_pod_identity_association" "argocd_api_server" {
-# #   cluster_name    = module.eks.cluster_name
-# #   namespace       = "argocd"
-# #   service_account = "argocd-server"
-# #   role_arn        = aws_iam_role.argocd_hub.arn
-# # }
+resource "aws_eks_pod_identity_association" "eso_sa" {
+  cluster_name    = module.eks.cluster_name
+  namespace       = "external-secrets"
+  service_account = "external-secrets"
+  role_arn        = aws_iam_role.eso.arn
+}
